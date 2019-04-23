@@ -44,7 +44,6 @@ namespace OldChatCleanup
 
 
             }
-            nameTags = nameTags.Distinct().ToList();
 
             foreach(Tuple<int, string, string> nameLine in annotatedChatLines )
             {
@@ -54,7 +53,9 @@ namespace OldChatCleanup
                 {
                     if (match.Length > 2)
                     {
-                        nameTags.Add(match.Value.Trim());
+                        int indexOfColon = 0;
+                        indexOfColon = match.Value.IndexOf(':');
+                        nameTags.Add(match.Value.Trim().Substring(0,(indexOfColon+1)));
                     }
                 }
             }
@@ -154,6 +155,15 @@ namespace OldChatCleanup
         public static void WriteChatFile(List<string> chatlines, string path, DateTime fileDate)
         {
             chatlines.Insert(0, "================================================================================");
+
+            if (nameTags.Count > 0)
+            {
+                chatlines.Insert(0, "==Characters in this scene==");
+                foreach(string character in nameTags)
+                {
+                    chatlines.Insert(0, character);
+                }
+            }
             if (fileDate < (DateTime.Now.AddYears(-15)))
             {
                 chatlines.Insert(0, ConfigurationManager.AppSettings["DateTagText"] + fileDate.ToLongDateString());
