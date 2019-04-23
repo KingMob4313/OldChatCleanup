@@ -12,62 +12,30 @@ namespace OldChatCleanup
     class ChatFile
     {
         public static List<string> nameTags = new List<string>();
-        public static List<Tuple<int, string, string>> ReadChatfile(string fileName, MainWindow mw)
+        public static List<Tuple<int, string, string>> ProcessChatFile(string fileName, MainWindow mw)
         {
             List<Tuple<int, string, string>> annotatedChatLines = new List<Tuple<int, string, string>>();
             int lineCounter = 0;
-
             nameTags.Clear();
 
+            //Fix word/line wrapped lines by joining them to previous
             List<string> FileLines = FixSplitLines(File.ReadAllText(fileName));
 
-            foreach (string line in FileLines)
-            {
-                lineCounter++;
-                string chatLine = Regex.Replace(line, @"\s+", string.Empty);
+            //Process File Lines into Tuple with Line Count, String, Hash
+            annotatedChatLines = PushLinesIntoTuple(lineCounter, FileLines);
 
-
-
-                if (line.Length > 1)
-                {
-                    int subCount = 30;
-                    if(line.Length < 31)
-                    {
-                        subCount = line.Length / 2;
-                    }
-                    if (!line.Contains(@" -> "))
-                    {
-                        annotatedChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetHashString(chatLine.Substring(subCount))));
-                    }
-                }
-                annotatedChatLines = CleanChatFile(annotatedChatLines);
-
-
-            }
-
-            foreach(Tuple<int, string, string> nameLine in annotatedChatLines )
-            {
-                var nameMatch = Regex.Match(nameLine.Item2, @"^([ -\(\+-~]+: )");
-
-                foreach (Capture match in nameMatch.Groups)
-                {
-                    if (match.Length > 2)
-                    {
-                        int indexOfColon = 0;
-                        indexOfColon = match.Value.IndexOf(':');
-                        nameTags.Add(match.Value.Trim().Substring(0,(indexOfColon+1)));
-                    }
-                }
-            }
-            //var nameMatch = Regex.Match(line, @"^([A-Za-z\~\s]+:\s)");
-            nameTags = nameTags.Distinct().ToList();
-
+            //Get names from chat lines
+            nameTags = GetNamesFromChat(annotatedChatLines);
+            
+            //add those lines to the control box
             foreach (string name in nameTags)
             {
                 mw.NameListBox.Items.Add(name);
             }
 
             List<Tuple<int, string, string>> splitChatLines = new List<Tuple<int, string, string>>();
+            
+            //Split lines where lines from different people end up on the same line
             foreach (Tuple<int, string, string> changedLine in annotatedChatLines)
             {
                 string splitLine = string.Empty;
@@ -94,6 +62,54 @@ namespace OldChatCleanup
             return annotatedChatLines;
         }
 
+        private static List<Tuple<int, string, string>> PushLinesIntoTuple(int lineCounter, List<string> FileLines)
+        {
+            List<Tuple<int, string, string>> currentChatLines =  new List<Tuple<int, string, string>>();
+            foreach (string line in FileLines)
+            {
+                lineCounter++;
+                string chatLine = Regex.Replace(line, @"\s+", string.Empty);
+
+                if (line.Length > 1)
+                {
+                    int subCount = 30;
+                    if (line.Length < 31)
+                    {
+                        subCount = line.Length / 2;
+                    }
+                    //If the line contains a PM, don't include it
+                    if (!line.Contains(@" -> "))
+                    {
+                        currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetHashString(chatLine.Substring(subCount))));
+                    }
+                }
+                currentChatLines = CleanChatFile(currentChatLines);
+            }
+            return currentChatLines;
+        }
+
+        private static List<string> GetNamesFromChat(List<Tuple<int, string, string>> annotatedChatLines)
+        {
+            foreach (Tuple<int, string, string> nameLine in annotatedChatLines)
+            {
+                var nameMatch = Regex.Match(nameLine.Item2, @"^([ -\(\+-~]+: )");
+
+                foreach (Capture match in nameMatch.Groups)
+                {
+                    if (match.Length > 2)
+                    {
+                        int indexOfColon = 0;
+                        indexOfColon = match.Value.IndexOf(':');
+                        nameTags.Add(match.Value.Trim().Substring(0, (indexOfColon + 1)));
+                    }
+                }
+            }
+            //var nameMatch = Regex.Match(line, @"^([A-Za-z\~\s]+:\s)");
+            nameTags = nameTags.Distinct().ToList();
+
+            return nameTags;
+        }
+
         private static List<string> FixSplitLines(string wholeTextFile)
         {
             List<string> splitText = new List<string>();
@@ -112,7 +128,6 @@ namespace OldChatCleanup
 
             foreach (Tuple<int, string, string> lineToHash in annotatedChatLines)
             {
-
                 validHashes.Add(lineToHash.Item3);
             }
 
@@ -154,12 +169,18 @@ namespace OldChatCleanup
 
         public static void WriteChatFile(List<string> chatlines, string path, DateTime fileDate)
         {
+            List<string> CompletedChatLines = CreateChatHeader(chatlines, fileDate);
+            File.WriteAllLines(path, CompletedChatLines);
+        }
+
+        private static List<string> CreateChatHeader(List<string> chatlines, DateTime fileDate)
+        {
             chatlines.Insert(0, "================================================================================");
 
             if (nameTags.Count > 0)
             {
                 chatlines.Insert(0, "==Characters in this scene==");
-                foreach(string character in nameTags)
+                foreach (string character in nameTags)
                 {
                     chatlines.Insert(0, character);
                 }
@@ -172,7 +193,8 @@ namespace OldChatCleanup
             {
                 chatlines.Insert(0, ConfigurationManager.AppSettings["DateTagText"] + "Unknown");
             }
-            File.WriteAllLines(path, chatlines);
+
+            return chatlines;
         }
     }
 }

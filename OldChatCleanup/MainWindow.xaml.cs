@@ -35,7 +35,8 @@ namespace OldChatCleanup
 
             
 
-            annotatedChatLines = ChatFile.ReadChatfile(OFD.FileName, this);
+            annotatedChatLines = ChatFile.ProcessChatFile(OFD.FileName, this);
+
             List<string> chatLine = new List<string>();
 
             foreach (Tuple<int, string, string> line in annotatedChatLines)
