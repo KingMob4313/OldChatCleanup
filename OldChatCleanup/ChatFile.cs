@@ -26,15 +26,18 @@ namespace OldChatCleanup
 
             //Get names from chat lines
             nameTags = GetNamesFromChat(annotatedChatLines);
-            
+            mw.NameListBox.Items.Clear();
             //add those lines to the control box
             foreach (string name in nameTags)
             {
-                mw.NameListBox.Items.Add(name);
+                if (name.Length > 4)
+                {
+                    mw.NameListBox.Items.Add(name);
+                }
             }
 
             List<Tuple<int, string, string>> splitChatLines = new List<Tuple<int, string, string>>();
-            
+
             //Split lines where lines from different people end up on the same line
             foreach (Tuple<int, string, string> changedLine in annotatedChatLines)
             {
@@ -64,24 +67,27 @@ namespace OldChatCleanup
 
         private static List<Tuple<int, string, string>> PushLinesIntoTuple(int lineCounter, List<string> FileLines)
         {
-            List<Tuple<int, string, string>> currentChatLines =  new List<Tuple<int, string, string>>();
+            List<Tuple<int, string, string>> currentChatLines = new List<Tuple<int, string, string>>();
             foreach (string line in FileLines)
             {
                 lineCounter++;
                 string chatLine = Regex.Replace(line, @"\s+", string.Empty);
 
+
                 if (line.Length > 1)
                 {
-                    int subCount = 30;
-                    if (line.Length < 31)
+                    //Doing some hash weirdness to only include the meat of the chat line
+                    int subCount = 25;
+                    if (line.Length < 35)
                     {
                         subCount = line.Length / 2;
                     }
-                    //If the line contains a PM, don't include it
+                    //If the line doesn't contain a PM, include it
                     if (!line.Contains(@" -> "))
                     {
                         currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetHashString(chatLine.Substring(subCount))));
                     }
+
                 }
                 currentChatLines = CleanChatFile(currentChatLines);
             }
@@ -99,7 +105,7 @@ namespace OldChatCleanup
                     if (match.Length > 2)
                     {
                         int indexOfColon = 0;
-                        indexOfColon = match.Value.IndexOf(':');
+                        indexOfColon = match.Value.Trim().IndexOf(':');
                         nameTags.Add(match.Value.Trim().Substring(0, (indexOfColon + 1)));
                     }
                 }
@@ -175,23 +181,24 @@ namespace OldChatCleanup
 
         private static List<string> CreateChatHeader(List<string> chatlines, DateTime fileDate)
         {
-            chatlines.Insert(0, "================================================================================");
+            chatlines.Insert(0, "================================================================================" + "\r\n");
 
             if (nameTags.Count > 0)
             {
                 chatlines.Insert(0, "==Characters in this scene==");
                 foreach (string character in nameTags)
                 {
-                    chatlines.Insert(0, character);
+                    chatlines.Insert(1, character);
                 }
+
             }
             if (fileDate < (DateTime.Now.AddYears(-15)))
             {
-                chatlines.Insert(0, ConfigurationManager.AppSettings["DateTagText"] + fileDate.ToLongDateString());
+                chatlines.Insert(0, ConfigurationManager.AppSettings["DateTagText"] + fileDate.ToLongDateString() + "\r\n");
             }
             else
             {
-                chatlines.Insert(0, ConfigurationManager.AppSettings["DateTagText"] + "Unknown");
+                chatlines.Insert(0, ConfigurationManager.AppSettings["DateTagText"] + "Unknown" + "\r\n");
             }
 
             return chatlines;

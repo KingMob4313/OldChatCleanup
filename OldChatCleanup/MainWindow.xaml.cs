@@ -24,6 +24,7 @@ namespace OldChatCleanup
 
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
+            
             annotatedChatLines = new List<Tuple<int, string, string>>();
             OpenFileDialog OFD = new OpenFileDialog();
             OFD.ShowDialog();
@@ -44,7 +45,7 @@ namespace OldChatCleanup
 
                 if (line.Item2.Contains("<br>"))
                 {
-                    Console.Beep();
+                    //Console.Beep();
                 }
                 string recheckedLine = line.Item2.Replace("<br>", "\r\n\r\n");
                 chatLine.Add(recheckedLine + "\r\n");
