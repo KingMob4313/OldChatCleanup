@@ -27,28 +27,34 @@ namespace OldChatCleanup
             //Get names from chat lines
             nameTags = GetNamesFromChat(annotatedChatLines);
             mw.NameListBox.Items.Clear();
+            mw.NameListForForm.Clear();
             //add those lines to the control box
             foreach (string name in nameTags)
             {
                 if (name.Length > 4)
                 {
                     mw.NameListBox.Items.Add(name);
+                    mw.NameListForForm.Add(name);
                 }
             }
-
+            
             List<Tuple<int, string, string>> splitChatLines = new List<Tuple<int, string, string>>();
-
+            int lineCounterIncrement = 0;
             //Split lines where lines from different people end up on the same line
             foreach (Tuple<int, string, string> changedLine in annotatedChatLines)
             {
+                
                 string splitLine = string.Empty;
                 foreach (string name in nameTags)
                 {
                     int indexOfName = changedLine.Item2.IndexOf(name);
-                    if (indexOfName > 20)
+                    if (indexOfName > 20 && splitLine.Length > 3)
                     {
-                        splitLine = changedLine.Item2;
-                        splitLine = splitLine.Insert(indexOfName, "<br>");
+                        string firstLine;
+                        lineCounterIncrement++;
+                        firstLine = splitLine.Substring(0, indexOfName);
+                        splitLine = splitLine.Substring(indexOfName);
+                        splitChatLines.Add(new Tuple<int, string, string>((changedLine.Item1 + (lineCounterIncrement - 1)), firstLine, GetChatLineHash(firstLine)));
                         break;
                     }
                     else
@@ -56,12 +62,12 @@ namespace OldChatCleanup
                         splitLine = changedLine.Item2;
                     }
                 }
-                splitChatLines.Add(new Tuple<int, string, string>(changedLine.Item1, splitLine, changedLine.Item3));
-
+                splitChatLines.Add(new Tuple<int, string, string>((changedLine.Item1 + lineCounterIncrement), splitLine, GetChatLineHash(splitLine)));
             }
             annotatedChatLines = null;
-            annotatedChatLines = splitChatLines;
-
+            
+            //One more cleanup pass
+            annotatedChatLines = CleanChatFile(splitChatLines);
             return annotatedChatLines;
         }
 
@@ -72,7 +78,6 @@ namespace OldChatCleanup
             {
                 lineCounter++;
                 string chatLine = Regex.Replace(line, @"\s+", string.Empty);
-
 
                 if (line.Length > 1)
                 {
@@ -85,13 +90,25 @@ namespace OldChatCleanup
                     //If the line doesn't contain a PM, include it
                     if (!line.Contains(@" -> "))
                     {
-                        currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetHashString(chatLine.Substring(subCount))));
+                        currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetChatLineHash(chatLine)));
                     }
-
                 }
                 currentChatLines = CleanChatFile(currentChatLines);
             }
             return currentChatLines;
+        }
+
+        private static string GetChatLineHash(string line)
+        {
+            string chatLine = Regex.Replace(line, @"\s+", string.Empty);
+
+            //Doing some hash weirdness to only include the meat of the chat line
+            int subCount = 25;
+            if (line.Length < 35)
+            {
+                subCount = line.Length / 2;
+            }
+            return GetHashString(chatLine.Substring(subCount));
         }
 
         private static List<string> GetNamesFromChat(List<Tuple<int, string, string>> annotatedChatLines)
