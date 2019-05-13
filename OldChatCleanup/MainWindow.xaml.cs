@@ -125,7 +125,17 @@ namespace OldChatCleanup
             }
             else if (name.StartsWith("Rori Wi"))
             {
-                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if (name.ToLower().StartsWith("gunny"))
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:#000000; font-size: 0.925em" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             return changedHTMLLine;
