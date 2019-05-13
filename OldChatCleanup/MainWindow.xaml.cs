@@ -24,6 +24,7 @@ namespace OldChatCleanup
         private void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
             annotatedChatLines = new List<Tuple<int, string, string>>();
+
             OpenFileDialog OFD = new OpenFileDialog();
             OFD.ShowDialog();
             var currentFileName = OFD.FileName;
@@ -61,7 +62,7 @@ namespace OldChatCleanup
                 {
                     int startIndex = 0;
                     startIndex = htmlLines.IndexOf(name);
-                    string boldTag = "<span style=\"font-weight: bold;\">";
+                    string boldTag = "<span style=\"font-weight: bold; color:#000000; \">";
                     if (startIndex > -1 && startIndex < 3)
                     {
                         changedHTMLLine = htmlLines.Insert(startIndex, boldTag);
@@ -70,7 +71,7 @@ namespace OldChatCleanup
                     }
                 }
                 //If not in the namelist
-                if(changedHTMLLine.Length < 3)
+                if (changedHTMLLine.Length < 3)
                 {
                     changedHTMLLine = htmlLines;
                 }
@@ -84,7 +85,7 @@ namespace OldChatCleanup
         {
             if (name.StartsWith("Kai C") || name.Contains("4313") || name.StartsWith("Kai T") || name.Contains("Oni"))
             {
-                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["KaiColor"] + "\">");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["KaiColor"] + "; " + "font-family: 'Lucida Console', Monaco, monospace; " + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("Yara") || name.StartsWith("Tcu"))
@@ -104,12 +105,27 @@ namespace OldChatCleanup
             }
             else if (name.StartsWith("Morgan Pow"))
             {
-                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["MorganColor"] + "\">");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["MorganColor"] + "; " + "font-family: Georgia, serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("Joshua May"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["JoshColor"] + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if (name.StartsWith("Hawk:"))
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["HawkColor"] + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if (name.StartsWith("Tycho Ev"))
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["TychoColor"] + "; " + "font-family: Tahoma, Geneva, sans-serif;" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if (name.StartsWith("Rori Wi"))
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             return changedHTMLLine;
