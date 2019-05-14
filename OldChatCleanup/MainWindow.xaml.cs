@@ -15,6 +15,7 @@ namespace OldChatCleanup
     {
         public List<string> NameListForForm = new List<string>();
         List<Tuple<int, string, string>> annotatedChatLines = null;
+        public bool IsICQChatFile = false;
 
         public MainWindow()
         {
@@ -34,6 +35,18 @@ namespace OldChatCleanup
             DateTime fileModDate = File.GetLastWriteTime(currentFileName);
 
             annotatedChatLines = ChatFile.ProcessChatFile(OFD.FileName, this);
+
+            if (annotatedChatLines[0].Item2.Contains("ICQ Chat Session"))
+            {
+                IsICQChatFile = true;
+                annotatedChatLines.RemoveRange(0, 3);
+                fileModDate = ChatFile.ParseICQDate(annotatedChatLines[0].Item2);
+                annotatedChatLines.RemoveRange(0, 1);
+            }
+            else
+            {
+                IsICQChatFile = false;
+            }
 
             List<string> chatLine = new List<string>();
 
@@ -88,10 +101,13 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["KaiColor"] + "; " + "font-family: 'Lucida Console', Monaco, monospace; " + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
-            else if (name.StartsWith("Yara") || name.StartsWith("Tcu"))
+            else if (name.StartsWith("Yara") || name.StartsWith("Tcu") || name.StartsWith("Ajde"))
             {
+                changedHTMLLine = changedHTMLLine.Replace("Ajde:", "Yara:");
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["YaraColor"] + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+
+
             }
             else if (name.StartsWith("William Ja"))
             {
@@ -135,7 +151,7 @@ namespace OldChatCleanup
             }
             else
             {
-                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:#000000; font-size: 0.925em" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:#111111; font-size: 0.925em" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             return changedHTMLLine;

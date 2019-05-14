@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -19,6 +20,7 @@ namespace OldChatCleanup
             nameTags.Clear();
 
             //Fix word/line wrapped lines by joining them to previous
+
             List<string> FileLines = FixSplitLines(File.ReadAllText(fileName));
 
             //Process File Lines into Tuple with Line Count, String, Hash
@@ -133,7 +135,7 @@ namespace OldChatCleanup
             //{
             //    subCount = line.Length / 2;
             //}
-            if (subCount > 0)
+            if (subCount > 0 && (endSpot > subCount))
             {
                 return GetHashString(chatLine.Substring(subCount, (endSpot)));
             }
@@ -168,9 +170,18 @@ namespace OldChatCleanup
         private static List<string> FixSplitLines(string wholeTextFile)
         {
             List<string> splitText = new List<string>();
-            string fixedTextFile = wholeTextFile.Replace("\r\n\r\n", "█");
-            fixedTextFile = fixedTextFile.Replace("\r\n", " ");
-            splitText = fixedTextFile.Split('█').ToList();
+            bool IsICQchat = wholeTextFile.StartsWith("ICQ Chat Session");
+            if (!IsICQchat)
+            {
+                string fixedTextFile = wholeTextFile.Replace("\r\n\r\n", "█");
+                fixedTextFile = fixedTextFile.Replace("\r\n", " ");
+                splitText = fixedTextFile.Split('█').ToList();
+            }
+            else
+            {
+                string fixedTextFile = wholeTextFile.Replace("\r\n", "█");
+                splitText = fixedTextFile.Split('█').ToList(); ;
+            }
             return splitText;
         }
 
@@ -252,6 +263,15 @@ namespace OldChatCleanup
             }
 
             return chatlines;
+        }
+
+        public static DateTime ParseICQDate(string inputDate)
+        {
+            DateTime currentDate = new DateTime();
+
+            currentDate = DateTime.ParseExact(inputDate.Substring(6, inputDate.Length -6), "dddd, MMMM d, yyyy", CultureInfo.CreateSpecificCulture("en-US"));
+
+            return currentDate;
         }
     }
 }
