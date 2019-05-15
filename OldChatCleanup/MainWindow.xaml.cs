@@ -104,19 +104,42 @@ namespace OldChatCleanup
             else if (name.StartsWith("Yara") || name.StartsWith("Tcu") || name.StartsWith("Ajde"))
             {
                 changedHTMLLine = changedHTMLLine.Replace("Ajde:", "Yara:");
-                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["YaraColor"] + "\">");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["YaraColor"] + "; " + "font-family: Verdana, Geneva, sans-serif; " + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
-
-
+            }
+            else if (name.StartsWith("Guylian McA") || name.StartsWith("Guyli") || name.StartsWith("Dragonfl"))
+            {
+                int nameChangedIndex = 0;
+                if (name.StartsWith("Dragonfl"))
+                {
+                    nameChangedIndex = "Guylian:".Length;
+                }
+                else
+                {
+                    nameChangedIndex = name.Length;
+                }
+                changedHTMLLine = changedHTMLLine.Replace("Dragonfly:", "Guylian:");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + nameChangedIndex + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["GuylianColor"] + "; " + "'Palatino Linotype', 'Book Antiqua', Palatino, serif; " + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("William Ja"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["WilliamColor"] + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
-            else if (name.StartsWith("Lady Red") || name.StartsWith("LadyRedE") || name.StartsWith("Carissa T"))
+            else if (name.StartsWith("Lady Red") || name.StartsWith("LadyRedE") || name.StartsWith("Carissa T") || name.StartsWith("PrincessV"))
             {
-                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["LREColor"] + "\">");
+                int nameChangedIndex = 0;
+                if (name.StartsWith("PrincessV"))
+                {
+                    nameChangedIndex = "Carissa Tukov:".Length;
+                }
+                else
+                {
+                    nameChangedIndex = name.Length;
+                }
+                changedHTMLLine = changedHTMLLine.Replace("PrincessVamp:", "Carissa Tukov:");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + nameChangedIndex + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["LREColor"] + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("Morgan Pow"))
