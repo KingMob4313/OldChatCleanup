@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using Path = System.IO.Path;
 
@@ -78,7 +79,8 @@ namespace OldChatCleanup
                     string boldTag = "<span style=\"font-weight: bold; color:#000000; \">";
                     if (startIndex > -1 && startIndex < 3)
                     {
-                        changedHTMLLine = htmlLines.Insert(startIndex, boldTag);
+                        string tempHtmlLines = CheckDerps(htmlLines, name);
+                        changedHTMLLine = tempHtmlLines.Insert(startIndex, boldTag);
                         changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length), "</span>");
                         changedHTMLLine = AddCharacterColors(changedHTMLLine, name, startIndex, boldTag);
                     }
@@ -92,6 +94,73 @@ namespace OldChatCleanup
                 newHTMLLines.Add(changedHTMLLine);
             }
             return newHTMLLines;
+        }
+
+        private string CheckDerps(string changedHTMLLine, string name)
+        {
+            MatchCollection wordMatches = Regex.Matches(changedHTMLLine, @"(\w+)");
+            string derpLine = string.Empty;
+            int counter = 1;
+            if (changedHTMLLine.ToLower().StartsWith("gunny") || changedHTMLLine.ToLower().StartsWith("rabid de"))
+            {
+                Random random = new Random(DateTime.Now.Minute);
+                foreach (Match currentWord in wordMatches)
+                {
+                    int roll = random.Next(0, 9);
+                    if (counter > 3)
+                    {
+                        if (roll < 2)
+                        {
+                            derpLine += currentWord.Value + " ";
+                        }
+                        else if (roll == 2)
+                        {
+                            derpLine += "derp ";
+                        }
+                        else if (roll == 3)
+                        {
+                            derpLine += "herp ";
+                        }
+                        else if (roll == 4)
+                        {
+                            derpLine += "herpity ";
+                        }
+                        else if (roll == 5)
+                        {
+                            derpLine += "Derp ";
+                        }
+                        else if (roll == 6)
+                        {
+                            derpLine += "herpa ";
+                        }
+                        else if (roll == 7)
+                        {
+                            derpLine += "derpy ";
+                        }
+                        else if (roll == 8)
+                        {
+                            derpLine += "herpy ";
+                        }
+                        else
+                        {
+                            derpLine += "DERP! ";
+                        }
+                        counter++;
+                    }
+                    else
+                    {
+                        derpLine += currentWord.Value + " ";
+                        counter++;
+                    }
+                    counter++;
+                }
+                changedHTMLLine = derpLine + " ";
+                return changedHTMLLine + "\r\n";
+            }
+            else
+            {
+                return changedHTMLLine + "\r\n";
+            }
         }
 
         private static string AddCharacterColors(string changedHTMLLine, string name, int startIndex, string boldTag)
@@ -139,7 +208,7 @@ namespace OldChatCleanup
                     nameChangedIndex = name.Length;
                 }
                 changedHTMLLine = changedHTMLLine.Replace("PrincessVamp:", "Carissa Tukov:");
-                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + nameChangedIndex + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["LREColor"] + "\">");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + nameChangedIndex + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["LREColor"] + ";" + "font-family: Goudy Old Style, Garamond, Big Caslon, Times New Roman, serif; font-size: 1.25em;>" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("Morgan Pow"))
@@ -167,7 +236,7 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
-            else if (name.ToLower().StartsWith("gunny"))
+            else if (name.ToLower().StartsWith("gunny") || name.ToLower().StartsWith("rabid de"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
