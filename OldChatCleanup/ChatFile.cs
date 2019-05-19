@@ -61,13 +61,25 @@ namespace OldChatCleanup
                     string tempSecondName = string.Empty;
                     foreach (string tempName in nameTagsWithColon)
                     {
-                        MatchCollection nameMatches = Regex.Matches(currentLine, @"(" + Regex.Escape(tempName) + ")");
-                        nameCount = nameMatches.Count + nameCount;
-                        if (nameCount > 1)
+                        if (currentLine.StartsWith(name))
                         {
-                            tempSecondName = nameMatches[0].Value.ToString();
-                            indexOfName = currentLine.IndexOf(name);
-                            nameCount = 0;
+                            MatchCollection nameMatches = Regex.Matches(currentLine, @"(" + Regex.Escape(tempName) + ")");
+                            foreach (Match nameMatch in nameMatches)
+                            {
+                                if (nameMatch.Index > 0)
+                                {
+                                    tempSecondName = nameMatch.Value.ToString();
+                                    indexOfName = currentLine.IndexOf(tempSecondName);
+                                }
+                            }
+
+                            //nameCount = nameMatches.Count + nameCount;
+                            //if (nameCount > 1)
+                            //{
+                            //    tempSecondName = nameMatches[0].Value.ToString();
+                                
+                            //    nameCount = 0;
+                            //}
                         }
                     }
                     if ((indexOfName > (MaxLength * 2) && currentLine.Length > 3))
