@@ -13,6 +13,8 @@ namespace OldChatCleanup
     class ChatFile
     {
         public static List<string> nameTags = new List<string>();
+        public static List<string> nameTagsWithColon = new List<string>();
+
         public static List<Tuple<int, string, string>> ProcessChatFile(string fileName, MainWindow mw)
         {
             List<Tuple<int, string, string>> annotatedChatLines = new List<Tuple<int, string, string>>();
@@ -37,11 +39,13 @@ namespace OldChatCleanup
                 {
                     mw.NameListBox.Items.Add(name);
                     mw.NameListForForm.Add(name);
+                    nameTagsWithColon.Add(name + ":");
                 }
             }
 
             List<Tuple<int, string, string>> splitChatLines = new List<Tuple<int, string, string>>();
             int lineCounterIncrement = 0;
+
             //Split lines where lines from different people end up on the same line
             foreach (Tuple<int, string, string> changedLine in annotatedChatLines)
             {
@@ -50,25 +54,25 @@ namespace OldChatCleanup
                 string splitLine = string.Empty;
                 bool wasLineSplit = false;
 
-                foreach (string name in nameTags)
+                foreach (string name in nameTagsWithColon)
                 {
                     int indexOfName = currentLine.IndexOf(name);
                     int nameCount = 0;
                     string tempSecondName = string.Empty;
-                    foreach (string tempName in nameTags)
+                    foreach (string tempName in nameTagsWithColon)
                     {
                         MatchCollection nameMatches = Regex.Matches(currentLine, @"(" + Regex.Escape(tempName) + ")");
                         nameCount = nameMatches.Count + nameCount;
                         if (nameCount > 1)
                         {
                             tempSecondName = nameMatches[0].Value.ToString();
-                            indexOfName = currentLine.IndexOf(tempSecondName);
+                            indexOfName = currentLine.IndexOf(name);
                             nameCount = 0;
                         }
                     }
                     if ((indexOfName > (MaxLength * 2) && currentLine.Length > 3))
                     {
-                        indexOfName = currentLine.IndexOf(tempSecondName);
+                        //indexOfName = currentLine.IndexOf(tempSecondName);
                         string firstLine = currentLine.Substring(0, indexOfName);
                         string secondLine = currentLine.Substring(indexOfName, (currentLine.Length - indexOfName));
                         lineCounterIncrement++;
@@ -113,8 +117,23 @@ namespace OldChatCleanup
                     {
                         subCount = line.Length / 2;
                     }
+
+                    //Fucking hell. Okay PM FORMAT is: 
+                    //[{Sender}] -> [{Receiver}]: Message
+                    //In order to fix this, I need to change name handling.
+                    //1) I need to handle names without the colon
+                    //2) Use the name with the colon to find first lines
+                    //3) Use names with -> t find real PMs.
                     //If the line doesn't contain a PM, include it
-                    if (!line.Contains(@" -> ") && !line.Contains(@"->"))
+                    //This is bugged
+                    //This will get you lines that have '->' but aren't whispers 
+                    //^[\w\s]+[:]{1}[\s\w\s:]+[-\>]+
+
+                    if (line.Contains(@" -> ") && Regex.IsMatch(line, @"^[\w\s]+[:]{1}[\s\w\s:]+[-\>]+"))
+                    {
+                        currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetChatLineHash(chatLine)));
+                    }
+                    else if (!line.Contains(@" -> "))
                     {
                         currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetChatLineHash(chatLine)));
                     }
@@ -157,7 +176,7 @@ namespace OldChatCleanup
                     {
                         int indexOfColon = 0;
                         indexOfColon = match.Value.Trim().IndexOf(':');
-                        nameTags.Add(match.Value.Trim().Substring(0, (indexOfColon + 1)));
+                        nameTags.Add(match.Value.Trim().Substring(0, (indexOfColon)));
                     }
                 }
             }
@@ -269,7 +288,7 @@ namespace OldChatCleanup
         {
             DateTime currentDate = new DateTime();
 
-            currentDate = DateTime.ParseExact(inputDate.Substring(6, inputDate.Length -6), "dddd, MMMM d, yyyy", CultureInfo.CreateSpecificCulture("en-US"));
+            currentDate = DateTime.ParseExact(inputDate.Substring(6, inputDate.Length - 6), "dddd, MMMM d, yyyy", CultureInfo.CreateSpecificCulture("en-US"));
 
             return currentDate;
         }

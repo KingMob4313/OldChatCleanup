@@ -99,6 +99,7 @@ namespace OldChatCleanup
         private string CheckDerps(string changedHTMLLine, string name)
         {
             MatchCollection wordMatches = Regex.Matches(changedHTMLLine, @"(\w+)");
+            MatchCollection nameMatches = Regex.Matches(name, @"(\w+)");
             string derpLine = string.Empty;
             int counter = 1;
             if (changedHTMLLine.ToLower().StartsWith("gunny") || changedHTMLLine.ToLower().StartsWith("rabid de"))
@@ -107,7 +108,7 @@ namespace OldChatCleanup
                 foreach (Match currentWord in wordMatches)
                 {
                     int roll = random.Next(0, 9);
-                    if (counter > 3)
+                    if (counter > nameMatches.Count + 1)
                     {
                         if (roll < 2)
                         {
@@ -152,7 +153,7 @@ namespace OldChatCleanup
                         derpLine += currentWord.Value + " ";
                         counter++;
                     }
-                    counter++;
+                    
                 }
                 changedHTMLLine = derpLine + " ";
                 return changedHTMLLine + "\r\n";
