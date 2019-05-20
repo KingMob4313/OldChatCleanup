@@ -6,6 +6,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using Path = System.IO.Path;
+using System.Linq;
 
 namespace OldChatCleanup
 {
@@ -36,6 +37,12 @@ namespace OldChatCleanup
             DateTime fileModDate = File.GetLastWriteTime(currentFileName);
 
             annotatedChatLines = ChatFile.ProcessChatFile(OFD.FileName, this);
+            List<string> namesWithColon = new List<string>();
+
+            foreach (string name in NameListForForm.Distinct().ToList())
+            {
+                namesWithColon.Add(name + ":");
+            }
 
             if (annotatedChatLines[0].Item2.Contains("ICQ Chat Session"))
             {
@@ -60,7 +67,7 @@ namespace OldChatCleanup
             string savePathAndFile = Path.GetDirectoryName(OFD.FileName) + "\\cleaned\\" + OFD.SafeFileName;
             ChatContentTextBox.Text = string.Join("", chatLine);
 
-            List<string> HTMLLines = AddHTMLTags(chatLine, NameListForForm);
+            List<string> HTMLLines = AddHTMLTags(chatLine, namesWithColon);
             ChatFile.WriteChatFile(HTMLLines, savePathAndFile, fileModDate);
         }
 
@@ -83,6 +90,10 @@ namespace OldChatCleanup
                         changedHTMLLine = tempHtmlLines.Insert(startIndex, boldTag);
                         changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length), "</span>");
                         changedHTMLLine = AddCharacterColors(changedHTMLLine, name, startIndex, boldTag);
+                    }
+                    else
+                    {
+                        Console.Write(changedHTMLLine);
                     }
                 }
                 //If not in the namelist
@@ -238,6 +249,11 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.ToLower().StartsWith("gunny") || name.ToLower().StartsWith("rabid de"))
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if (name.ToLower().StartsWith("Dartania"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
