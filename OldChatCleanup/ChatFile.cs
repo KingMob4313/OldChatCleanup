@@ -42,11 +42,26 @@ namespace OldChatCleanup
                     nameTagsWithColon.Add(name + ":");
                 }
             }
+            nameTagsWithColon = nameTagsWithColon.Distinct().ToList();
 
             List<Tuple<int, string, string>> splitChatLines = new List<Tuple<int, string, string>>();
             int lineCounterIncrement = 0;
 
-            //Split lines where lines from different people end up on the same line
+            //Split lines where lines from different people end up on the same line 
+            //Hit it once forward then in reverse.  Absolutely stupid.
+            splitChatLines = SplitOutCombinedLines(annotatedChatLines, lineCounter, lineCounterIncrement, nameTagsWithColon);
+            nameTagsWithColon.Reverse();
+            splitChatLines = SplitOutCombinedLines(splitChatLines, lineCounter, lineCounterIncrement, nameTagsWithColon);
+            annotatedChatLines = null;
+
+            //One more cleanup pass
+            annotatedChatLines = CleanChatFile(splitChatLines);
+            return annotatedChatLines;
+        }
+
+        private static List<Tuple<int, string, string>> SplitOutCombinedLines(List<Tuple<int, string, string>> annotatedChatLines, int lineCounter, int lineCounterIncrement, List<string> nameListWithColon)
+        {
+            List<Tuple<int, string, string>> newLine = new List<Tuple<int, string, string>>();
             foreach (Tuple<int, string, string> changedLine in annotatedChatLines)
             {
                 int MaxLength = nameTags.Max(x => x.Length) + 1;
@@ -54,12 +69,12 @@ namespace OldChatCleanup
                 string splitLine = string.Empty;
                 bool wasLineSplit = false;
 
-                foreach (string name in nameTagsWithColon)
+                foreach (string name in nameListWithColon)
                 {
                     int indexOfName = currentLine.IndexOf(name);
                     int nameCount = 0;
                     string tempSecondName = string.Empty;
-                    foreach (string tempName in nameTagsWithColon)
+                    foreach (string tempName in nameListWithColon)
                     {
                         if (currentLine.StartsWith(name))
                         {
@@ -72,14 +87,6 @@ namespace OldChatCleanup
                                     indexOfName = currentLine.IndexOf(tempSecondName);
                                 }
                             }
-
-                            //nameCount = nameMatches.Count + nameCount;
-                            //if (nameCount > 1)
-                            //{
-                            //    tempSecondName = nameMatches[0].Value.ToString();
-                                
-                            //    nameCount = 0;
-                            //}
                         }
                     }
                     if ((indexOfName > (MaxLength * 2) && currentLine.Length > 3))
@@ -89,8 +96,8 @@ namespace OldChatCleanup
                         string secondLine = currentLine.Substring(indexOfName, (currentLine.Length - indexOfName));
                         lineCounterIncrement++;
 
-                        splitChatLines.Add(new Tuple<int, string, string>((changedLine.Item1 + (lineCounterIncrement - 2)), firstLine, GetChatLineHash(firstLine)));
-                        splitChatLines.Add(new Tuple<int, string, string>((changedLine.Item1 + (lineCounterIncrement - 1)), secondLine, GetChatLineHash(secondLine)));
+                        newLine.Add(new Tuple<int, string, string>((changedLine.Item1 + (lineCounterIncrement - 2)), firstLine, GetChatLineHash(firstLine)));
+                        newLine.Add(new Tuple<int, string, string>((changedLine.Item1 + (lineCounterIncrement - 1)), secondLine, GetChatLineHash(secondLine)));
                         wasLineSplit = true;
                         break;
                     }
@@ -98,7 +105,7 @@ namespace OldChatCleanup
                     {
                         if (changedLine.Item2.Trim().StartsWith(name) || nameCount < 2)
                         {
-                            splitChatLines.Add(new Tuple<int, string, string>((changedLine.Item1 + lineCounter), currentLine, GetChatLineHash(currentLine)));
+                            newLine.Add(new Tuple<int, string, string>((changedLine.Item1 + lineCounter), currentLine, GetChatLineHash(currentLine)));
                             break;
                             //splitLine = currentLine;
                         }
@@ -106,11 +113,8 @@ namespace OldChatCleanup
 
                 }
             }
-            annotatedChatLines = null;
 
-            //One more cleanup pass
-            annotatedChatLines = CleanChatFile(splitChatLines);
-            return annotatedChatLines;
+            return newLine;
         }
 
         private static List<Tuple<int, string, string>> PushLinesIntoTuple(int lineCounter, List<string> FileLines)
