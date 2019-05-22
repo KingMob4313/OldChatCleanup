@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using static SymSpell;
 
 namespace OldChatCleanup
 {
@@ -22,8 +23,11 @@ namespace OldChatCleanup
             nameTags.Clear();
 
             //Fix word/line wrapped lines by joining them to previous
+            string allChatText = File.ReadAllText(fileName, Encoding.GetEncoding(1252));
 
-            List<string> FileLines = FixSplitLines(File.ReadAllText(fileName));
+            allChatText = ConvertAsciiToUTF8(allChatText);
+            
+            List<string> FileLines = FixSplitLines(allChatText);
             List<string> strippedFileLines = new List<string>();
 
             foreach (string line in FileLines)
@@ -44,7 +48,7 @@ namespace OldChatCleanup
             //add those lines to the control box
             foreach (string name in nameTags)
             {
-                if (name.Length > 4)
+                if (name.Length > 2)
                 {
                     mw.NameListBox.Items.Add(name);
                     mw.NameListForForm.Add(name);
@@ -67,6 +71,14 @@ namespace OldChatCleanup
             annotatedChatLines = CleanChatFile(splitChatLines);
             return annotatedChatLines;
         }
+
+        private static string ConvertAsciiToUTF8(string allChatText)
+        {
+            byte[] byteArray = Encoding.GetEncoding(1252).GetBytes(allChatText);
+            byte[] utf8String = Encoding.Convert(Encoding.GetEncoding(1252), Encoding.UTF8, byteArray);
+            return(Encoding.UTF8.GetString(utf8String));
+        }
+
         public static string RemoveAccents(string input)
         {
             return new string(

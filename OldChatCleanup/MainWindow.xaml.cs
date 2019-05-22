@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using Path = System.IO.Path;
-using System.Linq;
 
 namespace OldChatCleanup
 {
@@ -74,6 +74,20 @@ namespace OldChatCleanup
 
         private List<string> AddHTMLTags(List<string> chatLines, List<string> finalNameTags)
         {
+            int initialCapacity = 82765;
+            int maxEditDistanceDictionary = 2; //maximum edit distance per dictionary precalculation
+            var symSpellEngine = new SymSpell(initialCapacity, maxEditDistanceDictionary);
+            
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string dictionaryPath = baseDirectory + "../../frequency_dictionary_en_82_765.txt";
+            int termIndex = 0; //column of the term in the dictionary text file
+            int countIndex = 1; //column of the term frequency in the dictionary text file
+
+            if (!symSpellEngine.LoadDictionary(dictionaryPath, termIndex, countIndex))
+            {
+                Console.WriteLine("File not found!");
+            }
+
             //List<string> nameTags = new List<string>();
             List<string> newHTMLLines = new List<string>();
 
@@ -87,8 +101,19 @@ namespace OldChatCleanup
                     string boldTag = "<span style=\"font-weight: bold; color:#000000; \">";
                     if (startIndex > -1 && startIndex < 3)
                     {
+                        //Devildogs, ya know
                         string tempHtmlLines = CheckDerps(htmlLines, name);
-                        changedHTMLLine = tempHtmlLines.Insert(startIndex, boldTag);
+                        string spellingHMTLLines = string.Empty;
+                        //Fix Erica's bad spelling
+                        if (tempHtmlLines.StartsWith("Carissa"))
+                        {
+                            spellingHMTLLines = FixBadSpelling(tempHtmlLines, symSpellEngine);
+                        }
+                        else
+                        {
+                            spellingHMTLLines = tempHtmlLines;
+                        }
+                        changedHTMLLine = spellingHMTLLines.Insert(startIndex, boldTag);
                         changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length), "</span>");
                         changedHTMLLine = AddCharacterColors(changedHTMLLine, name, startIndex, boldTag);
                     }
@@ -108,23 +133,56 @@ namespace OldChatCleanup
             return newHTMLLines;
         }
 
+        private string FixBadSpelling(string tempHtmlLines, SymSpell spellingEngine)
+        {
+            //Use SymSpell to fix horrible spelling
+
+            //Space out tags
+            tempHtmlLines = tempHtmlLines.Replace("*", " * ");
+            tempHtmlLines = tempHtmlLines.Replace(". . . . .", "... ");
+            tempHtmlLines = tempHtmlLines.Replace(". . . .", "... ");
+            tempHtmlLines = tempHtmlLines.Replace(". . .", "... ");
+            tempHtmlLines = tempHtmlLines.Replace(". .", "... ");
+            int postStartIndex = tempHtmlLines.IndexOf(':') + 1;
+            //int endTagIndex = tempHtmlLines.Length - 4;
+            string postSubString = tempHtmlLines.Substring(postStartIndex, (tempHtmlLines.Length - postStartIndex - 5));
+
+            int maxEditDistanceLookup = 1; //max edit distance per lookup (maxEditDistanceLookup<=maxEditDistanceDictionary)
+            var suggestionVerbosity = SymSpell.Verbosity.Top; //Top, Closest, All
+            
+            maxEditDistanceLookup = 2; //max edit distance per lookup (per single word, not per whole input string)
+            var suggestions = spellingEngine.LookupCompound(tempHtmlLines, maxEditDistanceLookup);
+
+            var axy = suggestions[0];
+            var dog = spellingEngine.WordSegmentation(postSubString);
+            string fixedLine = dog.correctedString;
+            string fixedStuff = (tempHtmlLines.Substring(0, (postStartIndex)) + " " + fixedLine).Replace(" * ", "*");
+            return fixedStuff + "\r\n";
+        }
+
         private string CheckDerps(string changedHTMLLine, string name)
         {
             MatchCollection wordMatches = Regex.Matches(changedHTMLLine, @"(\w+)");
             MatchCollection nameMatches = Regex.Matches(name, @"(\w+)");
             string derpLine = string.Empty;
             int counter = 1;
-            if (changedHTMLLine.ToLower().StartsWith("gunny") || changedHTMLLine.ToLower().StartsWith("rabid de"))
+            if (changedHTMLLine.ToLower().StartsWith("gunny") || changedHTMLLine.ToLower().StartsWith("rabid de") || changedHTMLLine.ToLower().StartsWith("dartani"))
             {
                 Random random = new Random(DateTime.Now.Minute);
                 foreach (Match currentWord in wordMatches)
                 {
-                    int roll = random.Next(0, 9);
+                    int maxRoll = 12;
+                    if (changedHTMLLine.ToLower().StartsWith("gunny") || changedHTMLLine.ToLower().StartsWith("rabid de"))
+                    {
+                        maxRoll = 9;
+                    }
+
+                    int roll = random.Next(0, maxRoll);
                     if (counter > nameMatches.Count + 1)
                     {
-                        if (roll < 2)
+                        if (roll == 1)
                         {
-                            derpLine += currentWord.Value + " ";
+                            derpLine += "DERP! ";
                         }
                         else if (roll == 2)
                         {
@@ -156,7 +214,7 @@ namespace OldChatCleanup
                         }
                         else
                         {
-                            derpLine += "DERP! ";
+                            derpLine += currentWord.Value + " ";
                         }
                         counter++;
                     }
@@ -165,7 +223,7 @@ namespace OldChatCleanup
                         derpLine += currentWord.Value + " ";
                         counter++;
                     }
-                    
+
                 }
                 changedHTMLLine = derpLine + " ";
                 return changedHTMLLine + "\r\n";
@@ -270,7 +328,7 @@ namespace OldChatCleanup
         private string ReservedCharacterChangePass(string changedHTMLLine)
         {
             string tempLine = changedHTMLLine.Replace('*', '✳');
-            
+
             return tempLine.Replace("~", "〰️");
         }
 
