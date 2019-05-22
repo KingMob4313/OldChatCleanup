@@ -24,6 +24,15 @@ namespace OldChatCleanup
             //Fix word/line wrapped lines by joining them to previous
 
             List<string> FileLines = FixSplitLines(File.ReadAllText(fileName));
+            List<string> strippedFileLines = new List<string>();
+
+            foreach (string line in FileLines)
+            {
+                strippedFileLines.Add(RemoveAccents(line));
+            }
+
+            FileLines = null;
+            FileLines = strippedFileLines;
 
             //Process File Lines into Tuple with Line Count, String, Hash
             annotatedChatLines = PushLinesIntoTuple(lineCounter, FileLines);
@@ -58,7 +67,17 @@ namespace OldChatCleanup
             annotatedChatLines = CleanChatFile(splitChatLines);
             return annotatedChatLines;
         }
-
+        public static string RemoveAccents(string input)
+        {
+            return new string(
+                input
+                .Normalize(System.Text.NormalizationForm.FormD)
+                .ToCharArray()
+                .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                .ToArray());
+            // the normalization to FormD splits accented letters in accents+letters
+            // the rest removes those accents (and other non-spacing characters)
+        }
         private static List<Tuple<int, string, string>> SplitOutCombinedLines(List<Tuple<int, string, string>> annotatedChatLines, int lineCounter, int lineCounterIncrement, List<string> nameListWithColon)
         {
             List<Tuple<int, string, string>> newLine = new List<Tuple<int, string, string>>();
@@ -184,8 +203,8 @@ namespace OldChatCleanup
         {
             foreach (Tuple<int, string, string> nameLine in annotatedChatLines)
             {
-                var nameMatch = Regex.Match(nameLine.Item2, @"^([ -\)\+-~]+:)");
-
+                //var nameMatch = Regex.Match(nameLine.Item2, @"^([ -\)\+-~]+:)");
+                var nameMatch = Regex.Match(nameLine.Item2,@"^([ -\)\+-~*]+:)");
                 foreach (Capture match in nameMatch.Groups)
                 {
                     if (match.Length > 2)

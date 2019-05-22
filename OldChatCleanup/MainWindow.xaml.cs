@@ -29,6 +29,7 @@ namespace OldChatCleanup
             annotatedChatLines = new List<Tuple<int, string, string>>();
 
             OpenFileDialog OFD = new OpenFileDialog();
+            OFD.Filter = "Text|unsorted*.txt|All|*.*";
             OFD.ShowDialog();
             var currentFileName = OFD.FileName;
             FileNameTextBox.Text = currentFileName;
@@ -233,7 +234,7 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["JoshColor"] + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
-            else if (name.StartsWith("Hawk:"))
+            else if (name.Trim().StartsWith("Hawk"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["HawkColor"] + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
@@ -253,7 +254,7 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
-            else if (name.ToLower().StartsWith("Dartania"))
+            else if (name.StartsWith("Dartan"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
@@ -269,6 +270,7 @@ namespace OldChatCleanup
         private string ReservedCharacterChangePass(string changedHTMLLine)
         {
             string tempLine = changedHTMLLine.Replace('*', '✳');
+            
             return tempLine.Replace("~", "〰️");
         }
 
