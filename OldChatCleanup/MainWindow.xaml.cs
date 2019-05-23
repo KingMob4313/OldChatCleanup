@@ -77,7 +77,7 @@ namespace OldChatCleanup
             int initialCapacity = 82765;
             int maxEditDistanceDictionary = 2; //maximum edit distance per dictionary precalculation
             var symSpellEngine = new SymSpell(initialCapacity, maxEditDistanceDictionary);
-            
+
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string dictionaryPath = baseDirectory + "../../frequency_dictionary_en_82_765.txt";
             int termIndex = 0; //column of the term in the dictionary text file
@@ -135,6 +135,8 @@ namespace OldChatCleanup
 
         private string FixBadSpelling(string tempHtmlLines, SymSpell spellingEngine)
         {
+            SpellingCorrection dialog = new SpellingCorrection();
+
             //Use SymSpell to fix horrible spelling
 
             //Space out tags
@@ -149,7 +151,7 @@ namespace OldChatCleanup
 
             int maxEditDistanceLookup = 1; //max edit distance per lookup (maxEditDistanceLookup<=maxEditDistanceDictionary)
             var suggestionVerbosity = SymSpell.Verbosity.Top; //Top, Closest, All
-            
+
             maxEditDistanceLookup = 2; //max edit distance per lookup (per single word, not per whole input string)
             var suggestions = spellingEngine.LookupCompound(tempHtmlLines, maxEditDistanceLookup);
 
@@ -157,6 +159,17 @@ namespace OldChatCleanup
             var dog = spellingEngine.WordSegmentation(postSubString);
             string fixedLine = dog.correctedString;
             string fixedStuff = (tempHtmlLines.Substring(0, (postStartIndex)) + " " + fixedLine).Replace(" * ", "*");
+
+            dialog.ShowDialog();
+            if (dialog.DialogResult.HasValue && dialog.DialogResult.Value)
+            {
+
+            }
+            else
+            {
+
+            }
+
             return fixedStuff + "\r\n";
         }
 

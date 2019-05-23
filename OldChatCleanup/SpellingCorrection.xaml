@@ -1,0 +1,17 @@
+﻿<Window x:Class="OldChatCleanup.SpellingCorrection"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:OldChatCleanup"
+        mc:Ignorable="d"
+        Title="SpellingCorrection" Height="300" Width="600">
+    <Grid>
+        <Label Content="Original:&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Width="75" Height="27"/>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Original Chat Text" x:Name="OriginalChatText" VerticalAlignment="Top" Margin="85,15,0,0" Width="488" Height="101"/>
+        <Label Content="Suggested&#xD;&#xA;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,129,0,0" Width="75" Height="27"/>
+        <TextBox HorizontalAlignment="Left" Height="126" TextWrapping="Wrap" Text="Suggested Chat Text" VerticalAlignment="Top" x:Name="SuggestedChatTextTextBox" Width="497" Margin="85,133,0,0"/>
+        <Button Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Width="55" Margin="10,214,0,0" Height="45" Background="Green" Foreground="White"  />
+
+    </Grid>
+</Window>
