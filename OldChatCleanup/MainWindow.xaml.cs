@@ -105,7 +105,8 @@ namespace OldChatCleanup
                         string tempHtmlLines = CheckDerps(htmlLines, name);
                         string spellingHMTLLines = string.Empty;
                         //Fix Erica's bad spelling
-                        if (tempHtmlLines.StartsWith("Carissa"))
+                        if ((tempHtmlLines.StartsWith("Lady Red") || tempHtmlLines.StartsWith("LadyRedE") || tempHtmlLines.StartsWith("Carissa T") || tempHtmlLines.StartsWith("PrincessV")))
+                        
                         {
                             spellingHMTLLines = FixBadSpelling(tempHtmlLines, symSpellEngine);
                         }
@@ -136,6 +137,7 @@ namespace OldChatCleanup
         private string FixBadSpelling(string tempHtmlLines, SymSpell spellingEngine)
         {
             SpellingCorrection dialog = new SpellingCorrection();
+            dialog.OriginalChatText.Text = tempHtmlLines.ToString();
 
             //Use SymSpell to fix horrible spelling
 
@@ -159,18 +161,17 @@ namespace OldChatCleanup
             var dog = spellingEngine.WordSegmentation(postSubString);
             string fixedLine = dog.correctedString;
             string fixedStuff = (tempHtmlLines.Substring(0, (postStartIndex)) + " " + fixedLine).Replace(" * ", "*");
+            dialog.SuggestedChatTextTextBox.Text = fixedStuff;
 
             dialog.ShowDialog();
             if (dialog.DialogResult.HasValue && dialog.DialogResult.Value)
             {
-
+                return (dialog.SuggestedChatTextTextBox.Text + "\r\n");
             }
             else
             {
-
+                return fixedStuff + "\r\n";
             }
-
-            return fixedStuff + "\r\n";
         }
 
         private string CheckDerps(string changedHTMLLine, string name)
@@ -275,6 +276,12 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + nameChangedIndex + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["GuylianColor"] + "; " + "'Palatino Linotype', 'Book Antiqua', Palatino, serif; " + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
+            else if (name.StartsWith("Dewey"))
+            {
+                changedHTMLLine = changedHTMLLine.Replace("Ajde:", "Yara:");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:#000000; " + "font-family: 'Times New Roman', Times, serif; " + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
             else if (name.StartsWith("William Ja"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["WilliamColor"] + "\">");
@@ -323,6 +330,16 @@ namespace OldChatCleanup
             else if (name.ToLower().StartsWith("gunny") || name.ToLower().StartsWith("rabid de"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if (name.StartsWith("Iselayne")) 
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:#00cca3;" + "font-family: Goudy Old Style, Garamond, Big Caslon, Times New Roman, serif; font-size: 1.25em;>" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if(name.StartsWith("Alexandre") && name.ToLower().Contains("hawk"))
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:#CC5200\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("Dartan"))
