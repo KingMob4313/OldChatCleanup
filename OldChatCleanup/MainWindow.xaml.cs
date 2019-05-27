@@ -250,9 +250,14 @@ namespace OldChatCleanup
 
         private static string AddCharacterColors(string changedHTMLLine, string name, int startIndex, string boldTag)
         {
-            if (name.StartsWith("Kai C") || name.Contains("4313") || name.StartsWith("Kai T") || name.Contains("Oni"))
+            if (name.StartsWith("Kai C") || name.Contains("4313") || name.StartsWith("Kai T"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["KaiColor"] + "; " + "font-family: 'Lucida Console', Monaco, monospace; " + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if(name.StartsWith("Oni"))
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["OniColor"] + "; " + "font-family: 'Lucida Console', Monaco, monospace; " + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("Yara") || name.StartsWith("Tcu") || name.StartsWith("Ajde"))
@@ -303,6 +308,11 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("Morgan Pow"))
+            {
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["MorganColor"] + "; " + "font-family: Goudy Old Style, Garamond, Big Caslon, Times New Roman, serif; font-size: 1.25em;" + "\">");
+                changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
+            }
+            else if (name.StartsWith("Channon U"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["MorganColor"] + "; " + "font-family: Georgia, serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");

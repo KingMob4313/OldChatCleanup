@@ -8,7 +8,7 @@
         Title="SpellingCorrection" Height="300" Width="600">
     <Grid>
         <Label Content="Original:&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Width="75" Height="27"/>
-        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="Original Chat Text" x:Name="OriginalChatText" VerticalAlignment="Top" Margin="85,15,0,0" Width="488" Height="101"/>
+        <TextBox HorizontalAlignment="Left" TextWrapping="Wrap" Text="Original Chat Text" x:Name="OriginalChatText" VerticalAlignment="Top" Margin="85,15,0,0" Width="488" Height="101" IsEnabled="True" IsReadOnly="True" BorderThickness="0px" />
         <Label Content="Suggested&#xD;&#xA;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,129,0,0" Width="75" Height="27"/>
         <TextBox HorizontalAlignment="Left" Height="126" TextWrapping="Wrap" Text="Suggested Chat Text" VerticalAlignment="Top" x:Name="SuggestedChatTextTextBox" Width="497" Margin="85,133,0,0"/>
         <Button Content="Save" HorizontalAlignment="Left" VerticalAlignment="Top" Width="55" Margin="10,214,0,0" Height="45" Background="Green" Foreground="White" Click="Button_Click"  />
