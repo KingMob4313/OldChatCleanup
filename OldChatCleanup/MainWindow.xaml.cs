@@ -257,7 +257,7 @@ namespace OldChatCleanup
             }
             else if(name.StartsWith("Oni"))
             {
-                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["OniColor"] + "; " + "font-family: 'Lucida Console', Monaco, monospace; " + "\">");
+                changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["OniColor"] + "; " + "font-family: 'Lucida Console', Monaco, monospace; letter-spacing: 0.07em; " + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
             else if (name.StartsWith("Yara") || name.StartsWith("Tcu") || name.StartsWith("Ajde"))
