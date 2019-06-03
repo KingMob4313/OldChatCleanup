@@ -180,6 +180,14 @@ namespace OldChatCleanup
                     {
                         currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetChatLineHash(chatLine)));
                     }
+                    if (line.Contains(@" -> ") && ((line.TrimStart().StartsWith("Kai") || line.TrimStart().StartsWith("Oni") || line.TrimStart().StartsWith("Alexandre"))))
+                    {
+                        currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetChatLineHash(chatLine)));
+                    }
+                    if ((line.Contains(" -> Kai ") || line.Contains(" -> Oni") || line.Contains(" -> Alexandre")) && (line.StartsWith("Yara") || line.StartsWith("Tcu")))
+                    {
+                        currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetChatLineHash(chatLine)));
+                    }
                     else if (!line.Contains(@" -> "))
                     {
                         currentChatLines.Add(new Tuple<int, string, string>(lineCounter, line, GetChatLineHash(chatLine)));
