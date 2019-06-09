@@ -30,6 +30,7 @@ namespace OldChatCleanup
 
             OpenFileDialog OFD = new OpenFileDialog();
             OFD.Filter = "Text|unsorted*.txt|All|*.*";
+            OFD.FileName = "Unsorted_";
             OFD.ShowDialog();
             var currentFileName = OFD.FileName;
             FileNameTextBox.Text = currentFileName;
