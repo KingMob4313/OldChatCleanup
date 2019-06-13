@@ -31,46 +31,50 @@ namespace OldChatCleanup
             OpenFileDialog OFD = new OpenFileDialog();
             OFD.Filter = "Text|unsorted*.txt|All|*.*";
             OFD.FileName = "Unsorted_";
-            OFD.ShowDialog();
-            var currentFileName = OFD.FileName;
-            FileNameTextBox.Text = currentFileName;
-
-            DateTime creation = File.GetCreationTime(currentFileName);
-            DateTime fileModDate = File.GetLastWriteTime(currentFileName);
-
-            annotatedChatLines = ChatFile.ProcessChatFile(OFD.FileName, this);
-            List<string> namesWithColon = new List<string>();
-
-            foreach (string name in NameListForForm.Distinct().ToList())
+            bool? result = OFD.ShowDialog();
+            if (result == true)
             {
-                namesWithColon.Add(name + ":");
+                var currentFileName = OFD.FileName;
+                FileNameTextBox.Text = currentFileName;
+
+                DateTime creation = File.GetCreationTime(currentFileName);
+                DateTime fileModDate = File.GetLastWriteTime(currentFileName);
+
+                annotatedChatLines = ChatFile.ProcessChatFile(OFD.FileName, this);
+
+                List<string> namesWithColon = new List<string>();
+
+                foreach (string name in NameListForForm.Distinct().ToList())
+                {
+                    namesWithColon.Add(name + ":");
+                }
+
+                if (annotatedChatLines[0].Item2.Contains("ICQ Chat Session"))
+                {
+                    IsICQChatFile = true;
+                    annotatedChatLines.RemoveRange(0, 3);
+                    fileModDate = ChatFile.ParseICQDate(annotatedChatLines[0].Item2);
+                    annotatedChatLines.RemoveRange(0, 1);
+                }
+                else
+                {
+                    IsICQChatFile = false;
+                }
+
+                List<string> chatLine = new List<string>();
+
+                foreach (Tuple<int, string, string> line in annotatedChatLines)
+                {
+                    string recheckedLine = line.Item2.Trim();
+                    chatLine.Add(recheckedLine + "\r\n");
+                }
+
+                string savePathAndFile = Path.GetDirectoryName(OFD.FileName) + "\\cleaned\\" + OFD.SafeFileName;
+                ChatContentTextBox.Text = string.Join("", chatLine);
+
+                List<string> HTMLLines = AddHTMLTags(chatLine, namesWithColon);
+                ChatFile.WriteChatFile(HTMLLines, savePathAndFile, fileModDate);
             }
-
-            if (annotatedChatLines[0].Item2.Contains("ICQ Chat Session"))
-            {
-                IsICQChatFile = true;
-                annotatedChatLines.RemoveRange(0, 3);
-                fileModDate = ChatFile.ParseICQDate(annotatedChatLines[0].Item2);
-                annotatedChatLines.RemoveRange(0, 1);
-            }
-            else
-            {
-                IsICQChatFile = false;
-            }
-
-            List<string> chatLine = new List<string>();
-
-            foreach (Tuple<int, string, string> line in annotatedChatLines)
-            {
-                string recheckedLine = line.Item2.Trim();
-                chatLine.Add(recheckedLine + "\r\n");
-            }
-
-            string savePathAndFile = Path.GetDirectoryName(OFD.FileName) + "\\cleaned\\" + OFD.SafeFileName;
-            ChatContentTextBox.Text = string.Join("", chatLine);
-
-            List<string> HTMLLines = AddHTMLTags(chatLine, namesWithColon);
-            ChatFile.WriteChatFile(HTMLLines, savePathAndFile, fileModDate);
         }
 
         private List<string> AddHTMLTags(List<string> chatLines, List<string> finalNameTags)
@@ -107,7 +111,7 @@ namespace OldChatCleanup
                         string spellingHMTLLines = string.Empty;
                         //Fix Erica's bad spelling
                         if ((tempHtmlLines.StartsWith("Lady Red") || tempHtmlLines.StartsWith("LadyRedE") || tempHtmlLines.StartsWith("Carissa T") || tempHtmlLines.StartsWith("PrincessV")))
-                        
+
                         {
                             spellingHMTLLines = FixBadSpelling(tempHtmlLines, symSpellEngine);
                         }
@@ -130,6 +134,7 @@ namespace OldChatCleanup
                     changedHTMLLine = htmlLines;
                 }
                 changedHTMLLine = ReservedCharacterChangePass(changedHTMLLine);
+                changedHTMLLine = StylisticCharacterChangePass(changedHTMLLine);
                 newHTMLLines.Add(changedHTMLLine);
             }
             return newHTMLLines;
@@ -256,7 +261,7 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["KaiColor"] + "; " + "font-family: 'Lucida Console', Monaco, monospace; " + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
-            else if(name.StartsWith("Oni"))
+            else if (name.StartsWith("Oni"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:" + ConfigurationManager.AppSettings["OniColor"] + "; " + "font-family: 'Lucida Console', Monaco, monospace; letter-spacing: 0.07em; " + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
@@ -343,12 +348,12 @@ namespace OldChatCleanup
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"text-transform: uppercase; font-size: 0.85em; font-family:'" + ConfigurationManager.AppSettings["RoriSucks"] + "', cursive, sans-serif;" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
-            else if (name.StartsWith("Iselayne")) 
+            else if (name.StartsWith("Iselayne"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:#00cca3;" + "font-family: Goudy Old Style, Garamond, Big Caslon, Times New Roman, serif; font-size: 1.25em;>" + "\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
             }
-            else if(name.StartsWith("Alexandre") && name.ToLower().Contains("hawk"))
+            else if (name.StartsWith("Alexandre") && name.ToLower().Contains("hawk"))
             {
                 changedHTMLLine = changedHTMLLine.Insert((startIndex + boldTag.Length + name.Length + "</span>".Length), "<span style=\"color:#CC5200\">");
                 changedHTMLLine = changedHTMLLine.Insert(changedHTMLLine.Length - 2, "</span>");
@@ -369,8 +374,16 @@ namespace OldChatCleanup
         private string ReservedCharacterChangePass(string changedHTMLLine)
         {
             string tempLine = changedHTMLLine.Replace('*', '✳');
-
             return tempLine.Replace("~", "〰️");
+        }
+
+        private string StylisticCharacterChangePass(string changedHTMLLine)
+        {
+            //§«»‡†¥±™>>->
+            string tempLine = changedHTMLLine.Replace('§', '$').Replace('«', '|').Replace('»', '|').Replace('‡', '+');
+            tempLine = tempLine.Replace("™", "(TM)").Replace('†', '+').Replace('¥', '$').Replace('±', '=').Replace(@">>", "⇒").Replace(@"->", "⇒");
+            tempLine = tempLine.Replace("-➤", "⇒");
+            return tempLine;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
